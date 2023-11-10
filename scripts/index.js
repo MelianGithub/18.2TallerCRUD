@@ -59,14 +59,17 @@ function buscarID() {
                         <li>LASTNAME: ${apellido}</li>                    
                         `;
                     results.appendChild(li);
+
+                    input.value=''
                 }
 
                 else {
                     alert("El usuario no existe")
                 }
+                
             })
 
-        // input.value = '';
+            
     })
 }
 
@@ -77,11 +80,9 @@ function nuevoUser() {
     let name = document.getElementById("inputPostNombre");
     let lastname = document.getElementById("inputPostApellido");
 
-
-
     function chequearInputs() {
         if (name.value !== '' && lastname.value !== '') {
-            console.log("es mayor a 0")
+            
 
             agregar.removeAttribute('disabled')
         } else {
@@ -113,6 +114,7 @@ function nuevoUser() {
 
         name.value = '';
         lastname.value = '';
+        chequearInputs();
 
     });
 
@@ -141,11 +143,11 @@ function modificarUser() {
                 let res = data.find((element) => element.id == modInput.value)
 
                 if (res) {
-                    console.log(res)
+                    
                     nameModal.value = res.name;
                     lastNameModal.value = res.lastname;
 
-                    
+                    // Evento para modificar los datos
                     btnModificarPut.addEventListener('click', () => {
                         fetch(url + `/${modInput.value}`, {
                             method: 'PUT',
@@ -157,17 +159,17 @@ function modificarUser() {
                                 lastname: lastNameModal.value
                             })
                         })
-                        .then(resp => resp.json())
-                        .then(data => {
-                            alert('Datos actualizados')
-                        })
-                        .catch(error => {
-                            console.error('Error al actualizar los datos:', error);
-                        });
+                            .then(resp => resp.json())
+                            .then(data => {
+                                alert('Datos actualizados')
+                            })
+                            .catch(error => {
+                                console.error('Error al actualizar los datos:', error);
+                            });
                     });
                 } else {
-                    nameModal.value = ''; 
-                    lastNameModal.value = ''; 
+                    nameModal.value = '';
+                    lastNameModal.value = '';
                 }
             })
     });
@@ -175,17 +177,18 @@ function modificarUser() {
 
 
 function eliminarUser() {
-
     let borrar = document.getElementById("btnDelete");
-    let delInput = document.getElementById("inputDelete")
+    let delInput = document.getElementById("inputDelete");
 
-    delInput.addEventListener('input', () => {
-        if (delInput.value !== '') {
-            borrar.removeAttribute('disabled')
-        } else {
-            borrar.setAttribute('disabled', true)
-        }
-    })
+function check(){
+    if (delInput.value !== '') {
+        borrar.removeAttribute('disabled');
+    } else {
+        borrar.setAttribute('disabled', true);
+    }
+}
+
+    delInput.addEventListener('input',check);
 
     borrar.addEventListener("click", () => {
         fetch(url + "/" + delInput.value, {
@@ -193,20 +196,28 @@ function eliminarUser() {
             headers: {
                 'Content-type': 'application/json; charset=UTF-8'
             }
-
         })
-            .then(resp => resp.json())
-            .then(data => {
-                console.log(data)
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error('No se pudo eliminar el usuario');
+            }
+            return resp.json();
+        })
+        .then(data => {
+            if (data) {
+                console.log(data);
                 mostrarDatos();
-            })
+            } 
+        })
+        .catch(error => {
+            alert('No se encuentra el usuario');
+        });
 
-        delInput.value = ''
+        delInput.value = '';
+        check()
     });
-
-
-
 }
+
 
 
 
